@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apartments.Data", "..\Apart
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apartments.Core", "..\Apartments.Core\Apartments.Core.csproj", "{F99185BC-D4E9-4B05-B283-2BA886BB0E8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apartmrnts.Service", "..\Apartmrnts.Service\Apartmrnts.Service.csproj", "{ED7B3052-5632-4C1F-B031-F174E444D586}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apartmrnts.Service", "..\Apartmrnts.Service\Apartmrnts.Service.csproj", "{ED7B3052-5632-4C1F-B031-F174E444D586}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

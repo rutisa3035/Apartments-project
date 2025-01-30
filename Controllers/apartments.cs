@@ -1,9 +1,13 @@
-﻿using Apartments.Core.Services;
+﻿
+using Apartments.Core.DTOs;
+using Apartments.Core.Services;
 using Apartments.Entitise;
+using Apartments.Models;
 using Apartmrnts.Service;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Apartments.Controllers
 {
@@ -12,59 +16,85 @@ namespace Apartments.Controllers
     public class apartments : ControllerBase
     {
         private readonly IApartmentService _apartmentService;
+        private readonly IMapper _mapper;
 
-        public apartments(IApartmentService apartmentService)
+        public apartments(IApartmentService apartmentService, IMapper map)
         {
             _apartmentService = apartmentService;
+            _mapper = map;
+
+        }
+        // GET: api/<apartments>
+        [HttpGet]
+        public async Task<ActionResult> Get()
+        {
+            var apartmentList = await _apartmentService.GetList();
+            var apartment = _mapper.Map<IEnumerable<ApartmentDTO>>(apartmentList);
+            return Ok(apartment);
         }
 
         // GET: api/<apartments>
-        [HttpGet]
-        public ActionResult Get()
-        {
-            return Ok(_apartmentService.GetList());
-        }
+        //[HttpGet ("second")]
+        //public async Task<ActionResult> Get(int rooms,string city,string type)
+        //{
+        //    var apartmentList = _apartmentService.GetList();
+        //    var apartment = _mapper.Map<IEnumerable<ApartmentDTO>>(apartmentList);
+        //    return Ok(_apartmentService.GetList());
+        //}
+
+
 
         // GET api/<apartments>/5
         [HttpGet("{id}")]
-
-        public ActionResult Getid(int apartmentNum)
+        public async Task<ActionResult> GetById(int ApartmentNum)
         {
-            var apartment = _Context.apartment.Find(e => e.ApartmentNum == apartmentNum);
-            if (apartment == null)
+            var apart = await _apartmentService.GetById(ApartmentNum);
+            var apartment = _mapper.Map<IEnumerable<ApartmentDTO>>(apart);
+            if (apart != null)
             {
-                return NotFound();
+                return Ok(apart);
             }
-            return Ok(apartment);
+            return NotFound();
         }
 
         // POST api/<apartments>
         [HttpPost]
-        public ActionResult Post([FromBody] apartment value)
+        public async Task<ActionResult> Post([FromBody] ApartmentPostModel a)
         {
-            _Context.apartment.Add(value);
-            return Ok(value);
-        }
+            var newApartment = _mapper.Map<apartment>(a);
+             _apartmentService.Add(newApartment);
 
-        // PUT api/<apartments>/5
-        [HttpPut("{id}")]
-        public ActionResult Put(int apartmentNum, [FromBody] apartment value)
-        {
-            var index = _Context.apartment.FindIndex(e => e.ApartmentNum == apartmentNum);
-            _Context.apartment[index].City = value.City;
-            _Context.apartment[index].NumRooms = value.NumRooms;
-            _Context.apartment[index].Size = value.Size;
-            _Context.apartment[index].Floor = value.Floor;
-            _Context.apartment[index].Type = value.Type;
-            _Context.apartment[index].Amount = value.Amount;
-            return Ok(_Context.apartment[index]);
+            return Ok();
 
         }
+
+        //PUT api/<apartments>/5
+        [HttpPut("{apartmentNum}")]
+        public async Task <ActionResult> Put(int apartmentNum, [FromBody] ApartmentPostModel a)
+        {
+            
+            var apart = await _apartmentService.Put(apartmentNum, _mapper.Map <apartment>(a));
+
+            if (apart != null)
+            {
+                return Ok(apart);
+            }
+            return NotFound();
+        }
+
 
         // DELETE api/<apartments>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int apartment_num)
         {
+            var apart = _apartmentService.Remove(apartment_num);
+
+            if (apart != null)
+            {
+                return Ok();
+            }
+
+            return NotFound();
         }
     }
 }

@@ -1,6 +1,11 @@
-﻿using Apartments.Core.Services;
+﻿using Apartments.Core.DTOs;
+using Apartments.Core.Services;
+using Apartments.Data;
 using Apartments.Entitise;
+using Apartments.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,65 +17,71 @@ namespace Apartments.Controllers
     {
 
         private readonly IPatientService _patientService;
-        public patients(IPatientService patientService)
+        private readonly IMapper _mapper;
+
+        public patients(IPatientService patientService, IMapper map)
         {
             _patientService = patientService;
+            _mapper = map; 
         }
 
         // GET: api/<patients>
         [HttpGet]
 
-        public ActionResult Get()
+        public async Task <ActionResult> Get()
         {
-            return Ok(_Context.patient);
+            var patientList = await _patientService.GetAll();
+            var patients = _mapper.Map<IEnumerable<PatientDto>>(patientList);
+            return Ok(patients);
         }
 
         // GET api/<patients>/5
         [HttpGet("{id}")]
-
-
-      
-
-        public ActionResult Getid(int id)
+        public async Task <ActionResult> Get(int id)
         {
-            var patient = _Context.patient.Find(e => e.Id == id);
-            if (patient == null)
+            var pat = await _patientService.GetById(id);
+            var patient = _mapper.Map<PatientDto>(pat);
+            if (pat != null)
             {
-                return NotFound();  
+                return Ok(pat);
             }
-            return Ok(patient);  
+            return NotFound();
         }
-
-
-
 
         // POST api/<patients>
         [HttpPost]
-        public ActionResult Post([FromBody] patient value)
+        public async Task <ActionResult> Post([FromBody] PatientPostModel p)
         {
-            _Context.patient.Add(value);
-            return Ok(value);
+            var newPatient = _mapper.Map<patient>(p);
+            await _patientService.Add(newPatient);
+            return Ok();
         }
 
-        // PUT api/<patients>/5
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] patient value)
+        public async Task <ActionResult> Put(int id, [FromBody] PatientPostModel p)
         {
-            var index = _Context.patient.FindIndex(e => e.Id == id);
-            _Context.patient[index].Name = value.Name;
-            _Context.patient[index].Phone_number = value.Phone_number;
-            _Context.patient[index].Email = value.Email;
-            _Context.patient[index].Adress = value.Adress;
-            _Context.patient[index].Preferred_area = value.Preferred_area;
 
-            return Ok(_Context.patient[index]);
+            var pat = await _patientService.Put(id, _mapper.Map<patient>(p));
+            if (pat != null)
+            {
+                return Ok(pat);
+
+            }
+            return NotFound();
         }
 
         // DELETE api/<patients>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            var pat = await _patientService.Remove(id);
+            if (pat != null)
+            {
 
+                return Ok();
+            }
+            return NotFound();
         }
     }
 }
+

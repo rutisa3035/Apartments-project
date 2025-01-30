@@ -1,5 +1,9 @@
-﻿using Apartments.Core.Services;
+﻿using Apartments.Core.DTOs;
+using Apartments.Core.Services;
+using Apartments.Data;
 using Apartments.Entitise;
+using Apartments.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,62 +14,66 @@ namespace Apartments.Controllers
     [ApiController]
     public class brokers : ControllerBase
     {
-
         private readonly IBrokerService _brokerService;
-        public brokers(IBrokerService brokerService)
+        private readonly IMapper _Mapper;
+
+        public brokers(IBrokerService brokerService,IMapper map)
         {
             _brokerService = brokerService;
+            _Mapper = map;
         }
-
         // GET: api/<brokers>
         [HttpGet]
-
-        
-        public ActionResult Get()
+        public async Task <ActionResult> Get()
         {
-         return Ok(_Context.Broker);
-
+            var brokerList = await _brokerService.GetAll();// לבדוק
+            var brokers = _Mapper.Map<IEnumerable<BrokerDto>>(brokerList);
+            return Ok(brokers);
         }
 
         // GET api/<brokers>/5
-        [HttpGet("{id}")]
-     
-        public ActionResult Getid(int id)
+        [HttpGet("{id}")]  
+        public async Task <ActionResult> GetById(int id)
         {
-            var broker = _Context.Broker.Find(b => b.Id == id);
-            if (broker == null)
+            var bro = await _brokerService.GetById(id);
+            if (bro != null)
             {
-                return NotFound();  
+                return Ok(bro);  
             }
-            return Ok(broker);  
+            return NotFound();  
         }
 
         // POST api/<brokers>
         [HttpPost]
-        public ActionResult Post([FromBody] Broker value)
+        public async Task <ActionResult> Post([FromBody] BrokerPostModel b)
         {
-            _Context.Broker.Add(value);
-            return Ok(value);
-        }
+            var newbroker = _Mapper.Map<Broker>(b);
+            await _brokerService.Add(newbroker);
+            return Ok();
 
+        }
         // PUT api/<brokers>/5
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] Broker value)
+        public async Task <ActionResult> Put(int id, [FromBody] BrokerPostModel b)
         {
-            var index = _Context.Broker.FindIndex(e => e.Id == id);
-            _Context.Broker[index].Name = value.Name;
-            _Context.Broker[index].Phone_number = value.Phone_number;
-            _Context.Broker[index].Email = value.Email;
-            _Context.Broker[index].Adress = value.Adress;
-            return Ok(_Context.Broker[index]);
-
+            var bro = await _brokerService.Put(id, _Mapper.Map<Broker>(b));
+            if (bro != null)
+            {
+                return Ok();
+            }
+            return NotFound();
         }
 
         // DELETE api/<brokers>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task <ActionResult> Delete(int id)
         {
-
-        }
+            var bro = await _brokerService.Remove(id);
+            if (bro != null)
+            {
+                return Ok();
+            }
+            return NotFound();
+        }  
     }
 }
