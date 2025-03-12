@@ -5,6 +5,7 @@ using Apartments.Entitise;
 using Apartments.Models;
 using Apartmrnts.Service;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 
@@ -26,6 +27,7 @@ namespace Apartments.Controllers
         }
         // GET: api/<apartments>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult> Get()
         {
             var apartmentList = await _apartmentService.GetList();
@@ -46,10 +48,11 @@ namespace Apartments.Controllers
 
         // GET api/<apartments>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetById(int ApartmentNum)
+        [AllowAnonymous]
+        public async Task<ActionResult> GetById(int id)
         {
-            var apart = await _apartmentService.GetById(ApartmentNum);
-            var apartment = _mapper.Map<IEnumerable<ApartmentDTO>>(apart);
+            var apart = await _apartmentService.GetById(id);
+            var apartment = _mapper.Map<ApartmentDTO>(apart);
             if (apart != null)
             {
                 return Ok(apart);
@@ -59,6 +62,7 @@ namespace Apartments.Controllers
 
         // POST api/<apartments>
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> Post([FromBody] ApartmentPostModel a)
         {
             var newApartment = _mapper.Map<apartment>(a);
@@ -70,6 +74,7 @@ namespace Apartments.Controllers
 
         //PUT api/<apartments>/5
         [HttpPut("{apartmentNum}")]
+        [Authorize]
         public async Task <ActionResult> Put(int apartmentNum, [FromBody] ApartmentPostModel a)
         {
             
@@ -85,9 +90,10 @@ namespace Apartments.Controllers
 
         // DELETE api/<apartments>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int apartment_num)
+        [Authorize]
+        public async Task<ActionResult> Delete(int id)
         {
-            var apart = _apartmentService.Remove(apartment_num);
+            var apart = await _apartmentService.Remove(id);
 
             if (apart != null)
             {

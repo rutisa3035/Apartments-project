@@ -11,6 +11,6 @@
         public int Floor { get; set; }
 
         public string Type { get; set; }
-
+        public int BrokerId { get; set; }
     }
 }

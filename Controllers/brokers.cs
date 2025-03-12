@@ -4,6 +4,7 @@ using Apartments.Data;
 using Apartments.Entitise;
 using Apartments.Models;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -24,15 +25,17 @@ namespace Apartments.Controllers
         }
         // GET: api/<brokers>
         [HttpGet]
+        [AllowAnonymous]
         public async Task <ActionResult> Get()
         {
-            var brokerList = await _brokerService.GetAll();// לבדוק
+            var brokerList = await _brokerService.GetAll();
             var brokers = _Mapper.Map<IEnumerable<BrokerDto>>(brokerList);
             return Ok(brokers);
         }
 
         // GET api/<brokers>/5
-        [HttpGet("{id}")]  
+        [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task <ActionResult> GetById(int id)
         {
             var bro = await _brokerService.GetById(id);
@@ -45,6 +48,7 @@ namespace Apartments.Controllers
 
         // POST api/<brokers>
         [HttpPost]
+        [Authorize(Roles = "Broker")]
         public async Task <ActionResult> Post([FromBody] BrokerPostModel b)
         {
             var newbroker = _Mapper.Map<Broker>(b);
@@ -54,6 +58,7 @@ namespace Apartments.Controllers
         }
         // PUT api/<brokers>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Broker")]
         public async Task <ActionResult> Put(int id, [FromBody] BrokerPostModel b)
         {
             var bro = await _brokerService.Put(id, _Mapper.Map<Broker>(b));
@@ -66,6 +71,7 @@ namespace Apartments.Controllers
 
         // DELETE api/<brokers>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Broker")]
         public async Task <ActionResult> Delete(int id)
         {
             var bro = await _brokerService.Remove(id);

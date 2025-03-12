@@ -5,6 +5,10 @@ using Apartments.Core.Services;
 using Apartments.Data;
 using Apartments.Data.Repositories;
 using Apartmrnts.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Apartments.Api
@@ -35,8 +39,55 @@ namespace Apartments.Api
             builder.Services.AddScoped<IPatientService, PatientService>();
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 
+            builder.Services.AddScoped<IUsersServicece, UsersService>();
+            builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+
             builder.Services.AddDbContext<DataContext>();
             builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MappingPostModel));
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+   .AddJwtBearer(options =>
+   {
+       options.TokenValidationParameters = new TokenValidationParameters
+       {
+           ValidateIssuer = true,
+           ValidateAudience = true,
+           ValidateLifetime = true,
+           ValidateIssuerSigningKey = true,
+           ValidIssuer = builder.Configuration["JWT:Issuer"],
+           ValidAudience = builder.Configuration["JWT:Audience"],
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+       };
+   });
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Description = "Bearer Authentication with JWT Token",
+                    Type = SecuritySchemeType.Http
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Id = "Bearer",
+                    Type = ReferenceType.SecurityScheme
+                }
+            },
+            new List<string>()
+        }
+    });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -47,6 +98,8 @@ namespace Apartments.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
