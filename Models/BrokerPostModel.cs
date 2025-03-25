@@ -1,4 +1,4 @@
-﻿namespace Apartments.Models
+﻿ namespace Apartments.Models
 {
     public class BrokerPostModel
     {
@@ -7,6 +7,12 @@
         public int Phone_number { get; set; }
 
         public string Email { get; set; }
+
         public string Adress { get; set; }
+
+        public string UserName { get; set; }
+
+        public string Password { get; set; }
+
     }
 }

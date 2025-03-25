@@ -1,11 +1,14 @@
 ﻿using Apartments.Core.DTOs;
+using Apartments.Core.Entitise;
 using Apartments.Core.Services;
 using Apartments.Data;
 using Apartments.Entitise;
 using Apartments.Models;
+using Apartmrnts.Service;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Apartments.Core.Entitise.Users;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,15 +16,19 @@ namespace Apartments.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "manager")]
     public class brokers : ControllerBase
     {
         private readonly IBrokerService _brokerService;
         private readonly IMapper _Mapper;
+        private readonly IUsersService _usersService;
 
-        public brokers(IBrokerService brokerService,IMapper map)
+        public brokers(IBrokerService brokerService,IMapper map, IUsersService usersService)
         {
             _brokerService = brokerService;
             _Mapper = map;
+            _usersService = usersService;
+
         }
         // GET: api/<brokers>
         [HttpGet]
@@ -48,17 +55,26 @@ namespace Apartments.Controllers
 
         // POST api/<brokers>
         [HttpPost]
-        [Authorize(Roles = "Broker")]
         public async Task <ActionResult> Post([FromBody] BrokerPostModel b)
         {
+            var user = new  Users { UserName = b.UserName, Password = b.Password, Role = eRole.manager };
+            var User = await _usersService.AddUserAsync(user);
             var newbroker = _Mapper.Map<Broker>(b);
+            newbroker.user = User;
+            newbroker.UserId = User.Id;
+            var broker = await _brokerService.GetById(newbroker.Id);
+               if (broker != null)
+               {
+                   return Conflict();
+               }
             await _brokerService.Add(newbroker);
             return Ok();
 
         }
+
+
         // PUT api/<brokers>/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "Broker")]
         public async Task <ActionResult> Put(int id, [FromBody] BrokerPostModel b)
         {
             var bro = await _brokerService.Put(id, _Mapper.Map<Broker>(b));
@@ -71,7 +87,6 @@ namespace Apartments.Controllers
 
         // DELETE api/<brokers>/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Broker")]
         public async Task <ActionResult> Delete(int id)
         {
             var bro = await _brokerService.Remove(id);

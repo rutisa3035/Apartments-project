@@ -35,17 +35,6 @@ namespace Apartments.Controllers
             return Ok(apartment);
         }
 
-        // GET: api/<apartments>
-        //[HttpGet ("second")]
-        //public async Task<ActionResult> Get(int rooms,string city,string type)
-        //{
-        //    var apartmentList = _apartmentService.GetList();
-        //    var apartment = _mapper.Map<IEnumerable<ApartmentDTO>>(apartmentList);
-        //    return Ok(_apartmentService.GetList());
-        //}
-
-
-
         // GET api/<apartments>/5
         [HttpGet("{id}")]
         [AllowAnonymous]

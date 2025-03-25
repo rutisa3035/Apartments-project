@@ -15,12 +15,12 @@ namespace Apartments.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-                       
-        private readonly IUsersServicece _usersService;
+
+        private readonly IUsersService _usersService;
         private readonly IConfiguration _configuration;
 
 
-        public AuthController(IUsersServicece usersService, IConfiguration configuration)
+        public AuthController(IUsersService usersService, IConfiguration configuration)
         {
             _usersService = usersService;
             _configuration = configuration;
@@ -34,7 +34,7 @@ namespace Apartments.Controllers
                 var claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Role, user.Role== 0 ? "manager" : "passanger")
+                    new Claim(ClaimTypes.Role, user.Role== 0 ? "manager" : "patient")
                 };
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);

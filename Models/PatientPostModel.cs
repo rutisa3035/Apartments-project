@@ -11,8 +11,15 @@
         public string Adress { get; set; }
 
         public int Preferred_area { get; set; }
+
         public int ApartmentId { get; set; }
+
         public int BrokerId { get; set; }
+
         public string Password { get; set; }
+
+        public string UserName { get; set; }
+
+
     }
 }

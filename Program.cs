@@ -39,7 +39,7 @@ namespace Apartments.Api
             builder.Services.AddScoped<IPatientService, PatientService>();
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 
-            builder.Services.AddScoped<IUsersServicece, UsersService>();
+            builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
             builder.Services.AddDbContext<DataContext>();

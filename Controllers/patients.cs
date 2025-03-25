@@ -16,14 +16,15 @@ namespace Apartments.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class patients : ControllerBase
     {
 
         private readonly IPatientService _patientService;
         private readonly IMapper _mapper;
-        private readonly IUsersServicece _usersService;
+        private readonly IUsersService _usersService;
 
-        public patients(IPatientService patientService, IMapper map, IUsersServicece usersService)
+        public patients(IPatientService patientService, IMapper map, IUsersService usersService)
         {
             _patientService = patientService;
             _mapper = map;
@@ -57,7 +58,6 @@ namespace Apartments.Controllers
         // POST api/<patients>
         //[HttpGet("is-exist")]
         [HttpPost]
-        [Authorize(Roles = "Patient")]
         public async Task <ActionResult> Post([FromBody] PatientPostModel p)
         {
             var newPatient = _mapper.Map<patient>(p);
@@ -66,7 +66,9 @@ namespace Apartments.Controllers
                 var user1 = new Users { Password = p.Password, UserName = p.Name, Role = Users.eRole.patient };
                 newPatient.user = user1;
                 newPatient.UserId = user1.Id;
-                await _usersService.ADD(user1);
+                await _usersService.AddUserAsync(user1);
+
+
             }
             else
             {
@@ -79,7 +81,6 @@ namespace Apartments.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Patient")]
         public async Task <ActionResult> Put(int id, [FromBody] PatientPostModel p)
         {
 
@@ -94,7 +95,6 @@ namespace Apartments.Controllers
 
         // DELETE api/<patients>/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Patient")]
         public async Task<ActionResult> Delete(int id)
         {
             var pat = await _patientService.Remove(id);

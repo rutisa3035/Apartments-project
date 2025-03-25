@@ -14,15 +14,12 @@
             var requestMethod = context.Request.Method;
 
 
-            //if (requestMethod == "POST")
-            //{
             if (requestTime.Hour >= 1 && requestTime.Hour < 6 && !context.Response.HasStarted)
             {
                 Console.WriteLine("succes2");
                 await context.Response.WriteAsync($"The site is under development 🏗️");
                 return;
             }
-            //}
 
             await _next(context);
         }
